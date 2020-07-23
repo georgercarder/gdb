@@ -62,7 +62,16 @@ configure() {
 	do
 		# hosts <--> privKeys
 		read -p "  <user@host>$h: " host
+		emptyOrWrong=0
 		if [ -z "$host" ]; then
+			emptyOrWrong=1
+		fi
+		hasAt=$(echo $host | grep @)
+		if [ -z "$hasAt" ]; then
+			echo "  incorrect user@host format"
+			emptyOrWrong=$(($emptyOrWrong||1))
+		fi
+		if [ $emptyOrWrong -eq 1 ]; then
 			echo "  modify user@host's and their privateKeys "\
 				"manually later. "\
 				"(See -help later)"
@@ -73,9 +82,9 @@ configure() {
 		if [ -z "$pkPath" ]; then
 			pkPath=$defaultPkPath	
 		fi
-		host_n_keypath=(\"user@host\":\"$host\",\"pathToPrivateKey\":\"$pkPath\")
+		host_n_keypath=(\"user@host\":\"$host\",\
+				\"pathToPrivateKey\":\"$pkPath\")
 		HOST_N_KEYPATHS+=({${host_n_keypath[@]}},)
-		#FIXME	
 		echo ${HOST_N_KEYPATHS[@]}
 	done
 	# git repository 
@@ -97,7 +106,7 @@ configure() {
 	json={$pnKV,$prKV,$aKV,$hnk,$gKV}
 	#save "pretty" json
 	echo $json | jq > $gdpConfig
-	echo "configuration saved to" $pwd_$gdpConfig
+	echo "configuration saved to" $pwd_/$gdpConfig
 }
 read_config() {
 	a="cat"

@@ -4,24 +4,10 @@
 # GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 # see LICENSE at project root
 
-echo "TODO"
-
-# check defaultToExecutable for config
-#  if none exists, populate and save config
-
 ####################################
 ### configuration ##################
 ####################################
-#
-# projectname/alias
-#
-# project root (fs path)
-#
-# hosts <--> privKeys
-#
-# git repository 
-#
-####################################
+gdp_configuration  	
 
 ####################################
 ### control ########################
@@ -34,6 +20,8 @@ echo "TODO"
 # restart
 #
 ####################################
+
+#TODO make programmatic
 
 ####################################
 ## deployment ######################

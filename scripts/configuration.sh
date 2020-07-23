@@ -40,6 +40,7 @@ configure() {
 	projectRoot=$pwd_
 	alias_=$projectName
 	numberOfHosts=0
+	defaultTargetPath="~/"
 	HOST_N_KEYPATHS=()
 	defaultGitRepo=$(git remote get-url --push origin)
 	gitRepo=$defaultGitRepo
@@ -93,8 +94,14 @@ configure() {
 			if [ -z "$pkPath" ]; then
 				pkPath=$defaultPkPath	
 			fi
+			read -p "  $host targetPath [$defaultTargetPath]: "\
+								targetPath
+			if [ -z "$targetPath" ]; then
+				targetPath=$defaultTargetPath
+			fi
 			host_n_keypath=(\"user@host\":\"$host\",\
-					\"pathToPrivateKey\":\"$pkPath\")
+					\"pathToPrivateKey\":\"$pkPath\",\
+					\"targetPath\":\"$targetPath\")
 			HOST_N_KEYPATHS+=({${host_n_keypath[@]}},)
 		done
 		# git repository 
@@ -128,7 +135,7 @@ read_config() {
 ### ROUTINE ########################
 ####################################
 # check pwd for config
-gdpConfig=".gdp.config"
+gdpConfig=$pwd_/.gdp.config
 mustConfigure=0
 if [ ! -f $gdpConfig ];then
 	mustConfigure=$(($mustConfigure||1))

@@ -4,7 +4,8 @@
 # GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 # see LICENSE at project root
 
-ynToAll=$1
+yToAll=$1
+flags=$2
 
 ####################################
 ### configuration ##################
@@ -32,7 +33,7 @@ pwd_=$(pwd)
 ####################################
 configure() {
 	echo "configuring ..."
-	ynToAll=$1
+	yToAll=$1
 	#defaults
 	dirRoot=$(echo $pwd_| sed -e 's/.*\///')
 	projectName=$dirRoot
@@ -42,7 +43,7 @@ configure() {
 	HOST_N_KEYPATHS=()
 	defaultGitRepo=$(git remote get-url --push origin)
 	gitRepo=$defaultGitRepo
-	if [ "$ynToAll" == "n" ]; then
+	if [ "$yToAll" == "n" ]; then
 		# projectname/alias
 		read -p "projectName [$dirRoot]: " projectName 
 		if [ -z "$projectName" ]; then #default
@@ -128,12 +129,18 @@ read_config() {
 ####################################
 # check pwd for config
 gdpConfig=".gdp.config"
-if [ ! -f $gdpConfig ]; then
-	if [ -z "$ynToAll" ];then
-		ynToAll="n"
+mustConfigure=0
+if [ ! -f $gdpConfig ];then
+	mustConfigure=$(($mustConfigure||1))
+elif [ ! -z $(echo $flags|grep c ) ];then
+	mustConfigure=$(($mustConfigure||1))
+fi
+if [ $mustConfigure -eq 1 ]; then
+	if [ -z "$yToAll" ];then
+		yToAll="n"
 	fi
 	echo "gdp is not configured for this project" #"TODO"
-	if [ $ynToAll == "n" ]; then
+	if [ $yToAll == "n" ]; then
 		echo "press ENTER for defaults"
 		read -p "configure? [y/n]: " yn
 		if [ -z "$yn" ]; then 
@@ -144,6 +151,6 @@ if [ ! -f $gdpConfig ]; then
 		echo "configuration is necessary to use gdp"
 		exit 1 
 	else
-		configure $ynToAll
+		configure $yToAll
 	fi
 fi

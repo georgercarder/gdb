@@ -4,41 +4,53 @@
 # GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 # see LICENSE at project root
 
-ynToAll=$1
+flags=$1
+
+gdp_help $flags
+if [ $? -eq 0 ];then
+	exit 1
+fi
+
+yToAll="n"
+y=$(echo $flags|grep y)
+if [ ! -z "$y" ]; then
+	yToAll="y"
+fi
 
 ####################################
 ### configuration ##################
 ####################################
-gdp_configuration $ynToAll
-
-
-# TODO READ IN CONFIG
-
-####################################
-### control ########################
-####################################
-#
-# start
-#
-# stop
-#
-# restart
-#
-####################################
-
-#TODO make programmatic
+gdp_configuration $yToAll $flags # c flag?
 
 ####################################
 ## deployment ######################
 ####################################
 #
-# options
-#   (default start after build)?
-#
-# dev mode
-#   cp diff to nodes, run build
-#
+# d
+# dev mode 
+#   cp diff to nodes
+# p
 # prod mode
-#   run git pull on node, run build
+#   run git pull on node
+#
+# b build
+#   (option)
 #
 ####################################
+gdp_deployment $flags
+
+####################################
+### control ########################
+####################################
+#
+# boot b 
+#
+# stop s
+#
+# restart r
+#
+# switch w 
+#   (for advanced CI)
+#
+####################################
+gdp_control $flags

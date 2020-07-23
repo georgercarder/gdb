@@ -17,7 +17,7 @@ if [ ! -z "$h" ]; then
 	hFlag="h"
 fi
 if [ -z $flags ]; then
-	hFlag="H" # gdp should always have a flag
+	hFlag="h" # gdp should always have a flag
 fi
 if [ -z "$hFlag" ]; then
 	# hFlag is empty
@@ -25,21 +25,44 @@ if [ -z "$hFlag" ]; then
 fi
 advanced_help() {
 	#TODO
+	echo ""
 	echo "gdp - good deploy"
 	echo "-----------------"
 	echo "advanced help"
-	echo "  TODO 1"
+	echo "" 
+	echo "    | | | | | | | | | | | | | | | | |"
+	echo "   ###################################"
+	echo "---#                                 #---"	
+	echo "   #  gdp always needs an argument!  #"
+	echo "---#                                 #---"	
+	echo "   ###################################"
+	echo "    | | | | | | | | | | | | | | | | |"
+	echo ""
 	echo "  ..."
 	echo "  ..."
+	echo ""
+	#TODO more
 }
 basic_help() {
 	#TODO
+	echo ""
 	echo "gdp - good deploy"
 	echo "-----------------"
 	echo "basic help"
-	echo "  TODO 1"
+	echo ""
+	echo "    | | | | | | | | | | | | | | | | |"
+	echo "   ###################################"
+	echo "---#                                 #---"	
+	echo "   #  gdp always needs an argument!  #"
+	echo "---#                                 #---"	
+	echo "   ###################################"
+	echo "    | | | | | | | | | | | | | | | | |"
+	echo ""
 	echo "  ..."
 	echo "  ..."
+	echo "  ..."
+	echo ""
+	#TODO more
 }
 # advanced instructions H
 if [ "$hFlag" == "H" ]; then

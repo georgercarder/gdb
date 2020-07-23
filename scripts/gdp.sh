@@ -43,9 +43,9 @@ gdp_deployment $flags
 ### control ########################
 ####################################
 #
-# boot b 
+# start s 
 #
-# stop s
+# stop t (terminate) 
 #
 # restart r
 #

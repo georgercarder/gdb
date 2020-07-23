@@ -95,7 +95,6 @@ configure() {
 			host_n_keypath=(\"user@host\":\"$host\",\
 					\"pathToPrivateKey\":\"$pkPath\")
 			HOST_N_KEYPATHS+=({${host_n_keypath[@]}},)
-			echo ${HOST_N_KEYPATHS[@]}
 		done
 		# git repository 
 		read -p "git repository [$defaultGitRepo]: " gitRepo

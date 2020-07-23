@@ -31,6 +31,7 @@ pwd_=$(pwd)
 ### FUNCTIONS ######################
 ####################################
 configure() {
+	echo "configuring ..."
 	ynToAll=$1
 	#defaults
 	dirRoot=$(echo $pwd_| sed -e 's/.*\///')
@@ -141,11 +142,10 @@ if [ ! -f $gdpConfig ]; then
 		fi
 	fi
 	if [ "$yn" == "n" ]; then 
+		echo "configuration is necessary to use gdp"
 		exit 1 
 	else
 		configure $ynToAll
 	fi
-else 
-	echo "else TODO"
-	read_config
 fi
+read_config

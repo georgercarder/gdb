@@ -4,10 +4,15 @@
 # GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 # see LICENSE at project root
 
+ynToAll=$1
+
 ####################################
 ### configuration ##################
 ####################################
-gdp_configuration  	
+gdp_configuration $ynToAll
+
+
+# TODO READ IN CONFIG
 
 ####################################
 ### control ########################

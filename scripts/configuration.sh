@@ -148,4 +148,3 @@ if [ ! -f $gdpConfig ]; then
 		configure $ynToAll
 	fi
 fi
-read_config

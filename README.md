@@ -1,6 +1,8 @@
 # gdp 
 
-#### a great deploy tool
+#### good deploy
+
+##### a "good" minimalist devops tool
 
 (in development)
 

@@ -7,6 +7,18 @@
 echo ""
 echo "installing gdp ..."
 
+# check for git installed
+echo "  checking git is available ..."
+git version > /dev/null
+ext=$?  #(0 if installed, else nonzero)
+if [ ! $ext -eq 0 ]; then
+	echo ""
+	echo "installation unsuccessful"
+	echo "  git is not available"
+	echo "  check your git installation"
+	exit 1
+fi
+
 # check for ssh installed
 echo "  checking openssl is available ..."
 ssh -V 2> /dev/null
@@ -31,7 +43,6 @@ if [ ! $ext -eq 0 ]; then
 	exit 1
 fi
 
-# then do same as gfmt
 ln scripts/gdp.sh /usr/bin/gdp
 ext=$?
 ln scripts/configuration.sh /usr/bin/gdp_configuration

@@ -33,11 +33,6 @@ c=""
 ####################################
 ### FUNCTIONS ######################
 ####################################
-save() {
-	filename=$1
-	data=$2
-	echo $data > $filename
-}
 configure() {
 	# projectname/alias
 	dirRoot=$(echo $pwd_| sed -e 's/.*\///')
@@ -62,32 +57,47 @@ configure() {
 		echo "  modify hosts and their privateKeys manually later. "\
 			"(See -help later)"
 	fi
+	HOST_N_KEYPATHS=()
 	for (( h=0; h<$numberOfHosts; h++ )) 
 	do
 		# hosts <--> privKeys
-		read -p "  host$h: " host
+		read -p "  <user@host>$h: " host
 		if [ -z "$host" ]; then
-			echo "  modify hosts and their privateKeys "\
+			echo "  modify user@host's and their privateKeys "\
 				"manually later. "\
 				"(See -help later)"
 				break
 		fi
 		defaultPkPath="~/.ssh/$host.pem"
-		#if [ ! -z ${host:0:1} ]; then
-		firstChar=${host:0:1}
-		if [ ! -z "${firstChar##*[!0-9]*}" ]; then
-			defaultPkPath="~/.ssh/_$host.pem"
-		fi
-		read -p "  host$h pathToPrivateKey [$defaultPkPath]: " pkPath
+		read -p "  $host pathToPrivateKey [$defaultPkPath]: " pkPath
 		if [ -z "$pkPath" ]; then
 			pkPath=$defaultPkPath	
 		fi
-		#TODO append to an array
+		host_n_keypath=(\"user@host\":\"$host\",\"pathToPrivateKey\":\"$pkPath\")
+		HOST_N_KEYPATHS+=({${host_n_keypath[@]}},)
+		#FIXME	
+		echo ${HOST_N_KEYPATHS[@]}
 	done
-	#
 	# git repository 
-
-	#save $configuration > $gdpConfig
+	defaultGitRepo=$(git remote get-url --push origin)
+	read -p "git repository [$defaultGitRepo]: " gitRepo
+	if [ -z "$gitRepo" ]; then
+		gitRepo=$defaultGitRepo
+	fi
+	# form json and save
+	pnKV=\"projectName\":\"$projectName\"
+	prKV=\"projectRoot\":\"$projectRoot\"
+	aKV=\"alias_\":\"$alias_\"
+	hnk=${HOST_N_KEYPATHS[@]} #arr to string
+	if [ ! -z "$hnk" ]; then
+		hnk=${hnk::-1} #removes last comma
+	fi
+	hnk=\"hosts\":[$hnk]
+	gKV=\"gitRepo\":\"$gitRepo\"
+	json={$pnKV,$prKV,$aKV,$hnk,$gKV}
+	#save "pretty" json
+	echo $json | jq > $gdpConfig
+	echo "configuration saved to" $pwd_$gdpConfig
 }
 read_config() {
 	a="cat"

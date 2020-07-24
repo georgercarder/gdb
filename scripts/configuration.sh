@@ -50,6 +50,8 @@ configure() {
 	buildDir= #relative to project root
 	defaultBuildCommand="make"
 	buildCommand=
+	executableDir=
+	startCmd=
 	if [ "$yToAll" == "n" ]; then
 		# projectname/alias
 		read -p "projectName [$dirRoot]: " projectName 
@@ -125,6 +127,16 @@ configure() {
 		if [ -z "$buildCommand" ]; then
 			buildCommand=$defaultBuildCommand
 		fi
+		# executable dir
+		read -p "executable dir (relative to project root) [build dir]: " executableDir 
+		if [ -z "$executableDir" ]; then
+			executableDir=$defaultExecutableDir
+		fi
+		# start command
+		read -p "startCmd []: " startCmd 
+		if [ -z "$startCmd" ]; then
+			startCmd=""
+		fi
 	fi
 	# form json and save
 	pnKV=\"projectName\":\"$projectName\"
@@ -143,7 +155,9 @@ configure() {
 	gKV=\"gitRepo\":\"$gitRepo\"
 	bKV=\"buildDir\":\"$buildDir\"
 	cKV=\"buildCommand\":\"$buildCommand\"
-	json={$pnKV,$prKV,$aKV,$hnk,$gKV,$bKV,$cKV}
+	eKV=\"executableDir\":\"$executableDir\"
+	sKV=\"startCmd\":\"$startCmd\"
+	json={$pnKV,$prKV,$aKV,$hnk,$gKV,$bKV,$cKV,$eKV,$sKV}
 	#save "pretty" json
 	echo $json | jq > $gdpConfig
 	echo "configuration saved to" $gdpConfig

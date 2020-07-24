@@ -4,8 +4,8 @@
 # GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 # see LICENSE at project root
 
+pwd_=$(pwd)
 flags=$1
-
 ####################################
 ## deployment ######################
 ####################################
@@ -21,7 +21,6 @@ flags=$1
 #   (option)
 #
 ####################################
-
 d=$(echo $flags | grep d)
 p=$(echo $flags | grep p)
 b=$(echo $flags | grep b)
@@ -39,21 +38,29 @@ if [ ! -z "$d" ]; then
 	dOrP="d" # when ambiguous falls back to d
 	atLeastOne=$(($atLeastOne||1))
 fi
-
 config=
 if [ $atLeastOne -eq 1 ]; then
-	#TODO Read in config to config
-	echo "lets deploy!!" #TODO delete
+	gdpConfig=$pwd_/.gdp.config
+	config=$(cat $gdpConfig)
 else
 	exit 0
 fi
-echo $atLeastOne atLeastOne
-echo $dOrP dOrP
-
 # dep or prod
 if [ "$dOrP" == "d" ]; then # dev mode
-	#TODO
-	echo "TODO DEV MODE"
+	#   cp diff to nodes
+	projectRoot=$(echo $config | jq '."projectRoot"' | sed 's/"//g')
+	lenHosts=$(echo $config | jq '."hosts" | length')
+	# for loop over hosts
+	for (( h=0; h<$lenHosts; h++ )) 
+	do
+		host=$(echo $config | jq .hosts[$h])
+		userNHost=$(echo $host | jq '."user@host"' | sed 's/"//g')
+		pathToPrivateKey=$(echo $host | jq '.pathToPrivateKey')
+		targetPath=$(echo $host | jq '.targetPath' | sed 's/"//g')
+		rsync -avz -e "ssh -i $pathToPrivateKey" \
+				$projectRoot $userNHost:$targetPath
+
+	done
 elif [ "$dOrP" == "p" ]; then # prod mode
 	#TODO
 	echo "TODO PROD MODE"

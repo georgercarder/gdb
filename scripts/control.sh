@@ -36,6 +36,12 @@ s=$(flag_search $flags s)
 r=$(flag_search $flags r)
 t=$(flag_search $flags t)
 w=$(flag_search $flags w)
+anyControl=$(($s||$r||$t||$w))
+if [ $anyControl -ne 1 ]; then
+	exit 0
+fi
+config=$(cat $gdpConfig)
+#TODO MOD CONFIG TO HAVE cmds{START,STOP}
 #start
 if [ $s -eq 1 ]; then
 	#TODO start

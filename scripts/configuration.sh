@@ -130,7 +130,7 @@ configure() {
 		# executable dir
 		read -p "executable dir (relative to project root) [build dir]: " executableDir 
 		if [ -z "$executableDir" ]; then
-			executableDir=$defaultExecutableDir
+			executableDir=$buildDir
 		fi
 		# start command
 		read -p "startCmd []: " startCmd 
@@ -182,7 +182,7 @@ if [ $mustConfigure -eq 1 ]; then
 	echo "configure gdp for this project" #"TODO"
 	if [ $yToAll == "n" ]; then
 		echo "press ENTER for defaults"
-		read -p "configure? [y/n]: " yn
+		read -p "configure? [y]: " yn
 		if [ -z "$yn" ]; then 
 			yn="y" 
 		fi

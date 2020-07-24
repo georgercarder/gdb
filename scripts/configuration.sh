@@ -133,6 +133,11 @@ configure() {
 	hnk=${HOST_N_KEYPATHS[@]} #arr to string
 	if [ ! -z "$hnk" ]; then
 		hnk=${hnk::-1} #removes last comma
+	else
+		host_n_keypath=(\"user@host\":\"\",\
+				\"pathToPrivateKey\":\"\",\
+				\"targetPath\":\"\")
+		hnk={${host_n_keypath[@]}}
 	fi
 	hnk=\"hosts\":[$hnk]
 	gKV=\"gitRepo\":\"$gitRepo\"

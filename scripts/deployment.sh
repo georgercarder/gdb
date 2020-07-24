@@ -60,16 +60,36 @@ dep_dev() {
 			> /dev/null
 	if [ $? -ne 0 ]; then
 		ok=$(($ok||1))
-		echo "  dev deployment failure for" $userNHost
+		>&2 echo "  dev deployment failure for" $userNHost
+	fi
+}
+
+dep_prod() {
+	projectRoot=$1
+	config=$2
+	h=$3
+	host=$(echo $config | jq .hosts[$h])
+	userNHost=$(echo $host | jq '."user@host"' | sed 's/"//g')
+	pathToPrivateKey=$(echo $host | jq '.pathToPrivateKey' | sed 's/"//g')
+	targetPath=$(echo $host | jq '.targetPath' | sed 's/"//g')
+	projectFolder=${projectRoot##*/}
+	gitPullPath=$targetPath/$projectFolder
+	gitRepo=$(echo $host | jq '.gitRepo' | sed 's/"//g')
+	#FIXME use single gitKey
+	ssh -i $pathToPrivateKey $userNHost "cd $gitPullPath && git checkout -- . && git pull origin master" 2> /dev/null
+	ext=$?
+	if [ $ext -ne 0 ]; then
+		ok=$(($ok||1))
+		>&2 echo "  prod deployment failure for" $userNHost
 	fi
 }
 
 # dep or prod
+projectRoot=$(echo $config | jq '."projectRoot"' | sed 's/"//g')
+lenHosts=$(echo $config | jq '."hosts" | length')
 if [ "$dOrP" == "d" ]; then # dev mode
-	echo "  dev deploying ..." #TODO SILENT
+	>&2 echo "  dev deploying ..." #TODO SILENT
 	#   cp diff to nodes
-	projectRoot=$(echo $config | jq '."projectRoot"' | sed 's/"//g')
-	lenHosts=$(echo $config | jq '."hosts" | length')
 	if [ -z "$lenHosts" ]; then
 		lenHosts=0
 	fi
@@ -79,13 +99,25 @@ if [ "$dOrP" == "d" ]; then # dev mode
 		dep_dev $projectRoot "${config[@]}"  $i &
 	done
 	wait
-	echo "  dev deployment complete"
+	>&2 echo "  dev deployment complete"
 elif [ "$dOrP" == "p" ]; then # prod mode
-	#TODO
-	echo "TODO PROD MODE"
+	>&2 echo "  prod deploying ..." #TODO SILENT
+	#   run git pull on node
+	if [ -z "$lenHosts" ]; then
+		lenHosts=0
+	fi
+	ok=0
+	sshKeyPath=$(echo $config | jq '."sshKeyPath"')
+	for (( i=0; i<$lenHosts; i++ )) 
+	do
+		dep_prod $projectRoot "${config[@]}" $i $sshKeyPath &
+	done
+	wait
+	>&2 echo "  prod deployment complete"
 fi
 
 if [ $mustBuild -eq 0 ]; then
+	echo "" > /dev/null
 	exit
 fi
 

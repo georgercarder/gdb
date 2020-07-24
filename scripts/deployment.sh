@@ -5,6 +5,8 @@
 # see LICENSE at project root
 
 pwd_=$(pwd)
+gdpLogs=$pwd_/.gdp/gdp.logs
+gdpConfig=$pwd_/.gdp/gdp.config
 flags=$1
 ####################################
 ## deployment ######################
@@ -40,7 +42,6 @@ if [ ! -z "$d" ]; then
 fi
 config=
 if [ $atLeastOne -eq 1 ]; then
-	gdpConfig=$pwd_/.gdp/.gdp.config
 	config=$(cat $gdpConfig)
 else
 	exit 0
@@ -50,7 +51,6 @@ dep_dev() {
 	projectRoot=$1
 	config=$2
 	h=$3
-
 	host=$(echo $config | jq .hosts[$h])
 	userNHost=$(echo $host | jq '."user@host"' | sed 's/"//g')
 	>&2 echo "    "$userNHost
@@ -58,7 +58,7 @@ dep_dev() {
 	targetPath=$(echo $host | jq '.targetPath' | sed 's/"//g')
 	rsync -avz -e "ssh -i $pathToPrivateKey" \
 			$projectRoot $userNHost:$targetPath \
-			> /dev/null
+			>> $gdpLogs
 	if [ $? -ne 0 ]; then
 		ok=$(($ok||1))
 		>&2 echo "  dev deployment failure for" $userNHost
@@ -77,11 +77,10 @@ dep_prod() {
 	projectFolder=${projectRoot##*/}
 	gitPullPath=$targetPath/$projectFolder
 	gitRepo=$(echo $host | jq '.gitRepo' | sed 's/"//g')
-	#FIXME use single gitKey
-	ssh -i $pathToPrivateKey $userNHost "cd $gitPullPath && git checkout -- . && git pull origin master" 2> /dev/null
+	ssh -i $pathToPrivateKey $userNHost "cd $gitPullPath &&"\
+		" git checkout -- . && git pull origin master" 2>> $gdpLogs
 	ext=$?
 	if [ $ext -ne 0 ]; then
-		ok=$(($ok||1))
 		>&2 echo "  prod deployment failure for" $userNHost
 	fi
 }
@@ -108,7 +107,6 @@ elif [ "$dOrP" == "p" ]; then # prod mode
 	if [ -z "$lenHosts" ]; then
 		lenHosts=0
 	fi
-	ok=0
 	sshKeyPath=$(echo $config | jq '."sshKeyPath"')
 	for (( i=0; i<$lenHosts; i++ )) 
 	do
@@ -122,7 +120,43 @@ if [ $mustBuild -eq 0 ]; then
 	echo "" > /dev/null
 	exit
 fi
-
+build_rem() {
+	projectRoot=$1
+	buildDir=$2
+	buildCommand=$3
+	config=$4
+	h=$5
+	host=$(echo $config | jq .hosts[$h])
+	userNHost=$(echo $host | jq '."user@host"' | sed 's/"//g')
+	>&2 echo "    "$userNHost
+	pathToPrivateKey=$(echo $host | jq '.pathToPrivateKey' | sed 's/"//g')
+	targetPath=$(echo $host | jq '."targetPath"' | sed 's/"//g')	
+	projectFolder=${projectRoot##*/}
+	buildPath=$targetPath/$projectFolder/$buildDir
+	ssh -i $pathToPrivateKey $userNHost "cd $buildPath &&"\
+			" $buildCommand" 2>> $gdpLogs
+	ext=$?
+	if [ $ext -ne 0 ]; then
+		>&2 echo "  prod deployment failure for" $userNHost
+	fi
+}
 # build
-#TODO
-echo "BUILD TODO"
+>&2 echo "  building ..."
+if [ -z $lenHosts ]; then
+	lenHosts=0
+fi
+buildDir=$(echo $config | jq '."buildDir"' | sed 's/"//g')
+buildCommand=$(echo $config | jq '."buildCommand"' | sed 's/"//g')
+if [ -z "$buildDir" ]; then
+	echo "buildDir config entry empty. Check" $gdpConfig
+	exit 1
+elif [ -z "$buildCommand" ]; then
+	echo "buildCommand config entry empty. Check" $gdpConfig
+	exit 1
+fi
+for (( i=0; i<$lenHosts; i++ )) 
+do
+	build_rem $projectRoot $buildDir "${buildCommand[@]}" "${config[@]}" $i &
+done
+wait
+echo "  build complete"

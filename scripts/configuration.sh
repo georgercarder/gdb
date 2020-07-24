@@ -29,7 +29,7 @@ flags=$2
 ####################################
 pwd_=$(pwd)
 gdpDir=$pwd_/.gdp
-gdpConfig=$gdpDir/.gdp.config
+gdpConfig=$gdpDir/gdp.config
 ####################################
 ### FUNCTIONS ######################
 ####################################
@@ -46,7 +46,10 @@ configure() {
 	HOST_N_KEYPATHS=()
 	defaultGitRepo=$(git remote get-url --push origin)
 	gitRepo=$defaultGitRepo
-	sshKeyPath=
+	defaultBuildDir="."
+	buildDir= #relative to project root
+	defaultBuildCommand="make"
+	buildCommand=
 	if [ "$yToAll" == "n" ]; then
 		# projectname/alias
 		read -p "projectName [$dirRoot]: " projectName 
@@ -112,6 +115,16 @@ configure() {
 		if [ -z "$gitRepo" ]; then
 			gitRepo=$defaultGitRepo
 		fi
+		# build dir
+		read -p "build dir (relative to project root) [$defaultBuildDir]: " buildDir
+		if [ -z "$buildDir" ]; then
+			buildDir=$defaultBuildDir
+		fi
+		# build command
+		read -p "build command [$defaultBuildCommand]: " buildCommand
+		if [ -z "$buildCommand" ]; then
+			buildCommand=$defaultBuildCommand
+		fi
 	fi
 	# form json and save
 	pnKV=\"projectName\":\"$projectName\"
@@ -123,16 +136,12 @@ configure() {
 	fi
 	hnk=\"hosts\":[$hnk]
 	gKV=\"gitRepo\":\"$gitRepo\"
-	json={$pnKV,$prKV,$aKV,$hnk,$gKV}
+	bKV=\"buildDir\":\"$buildDir\"
+	cKV=\"buildCommand\":\"$buildCommand\"
+	json={$pnKV,$prKV,$aKV,$hnk,$gKV,$bKV,$cKV}
 	#save "pretty" json
 	echo $json | jq > $gdpConfig
 	echo "configuration saved to" $gdpConfig
-}
-read_config() {
-	#TODO
-	a="cat"
-	b="dot"
-	c="bird"
 }
 ####################################
 ### ROUTINE ########################

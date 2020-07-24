@@ -58,10 +58,13 @@ dep_dev() {
 	targetPath=$(echo $host | jq '.targetPath' | sed 's/"//g')
 	rsync -avz -e "ssh -i $pathToPrivateKey" \
 			$projectRoot $userNHost:$targetPath \
-			>> $gdpLogs
+			>> $gdpLogs 2>&1
 	if [ $? -ne 0 ]; then
-		ok=$(($ok||1))
-		>&2 echo "  dev deployment failure for" $userNHost
+		if [ -z "$userNHost" ]; then
+			>&2 echo "  dev deployment failure. gdp config error" 
+		else
+			>&2 echo "  dev deployment failure for" $userNHost
+		fi
 	fi
 }
 
@@ -81,7 +84,11 @@ dep_prod() {
 		" git checkout -- . && git pull origin master" 2>> $gdpLogs
 	ext=$?
 	if [ $ext -ne 0 ]; then
-		>&2 echo "  prod deployment failure for" $userNHost
+		if [ -z "$userNHost" ]; then
+			>&2 echo "  prod deployment failure. gdp config error" 
+		else
+			>&2 echo "  prod deployment failure for" $userNHost
+		fi
 	fi
 }
 

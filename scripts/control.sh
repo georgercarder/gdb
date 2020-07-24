@@ -41,11 +41,49 @@ if [ $anyControl -ne 1 ]; then
 	exit 0
 fi
 config=$(cat $gdpConfig)
-#TODO MOD CONFIG TO HAVE cmds{START,STOP}
+lenHosts=$(echo $config | jq '."hosts" | length')
+if [ -z "$lenHosts" ]; then
+	lenHosts=0
+fi
+parse_json() {
+	json=$1
+	key=$2
+	echo $json | jq ."\"$key\"" | sed 's/"//g'
+}
 #start
+start_cmd() {
+	config=$1
+	h=$2
+	host=$(echo $config | jq .hosts[$h])
+	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
+	userNHost=$(parse_json "${host[@]}" user@host)
+	>&2 echo "    "$userNHost
+	executableDir=$(parse_json "${config[@]}" executableDir)
+	projectRoot=$(parse_json "${config[@]}" projectRoot)
+	targetPath=$(parse_json "${host[@]}" targetPath)
+	projectFolder=${projectRoot##*/}
+	executablePath=$targetPath/$projectFolder/$executableDir
+	startCmd=$(parse_json "${config[@]}" startCmd)
+	ssh -i $pathToPrivateKey $userNHost "cd $executablePath &&"\
+		" $startCmd" >> $gdpLogs 2>&1
+	ext=$?
+	if [ $ext -ne 0 ]; then
+		if [ -z "$userNHost" ]; then
+			>&2 echo "  start failure. gdp config error" 
+		else
+			>&2 echo "  start failure for" $userNHost
+		fi
+	fi
+}
 if [ $s -eq 1 ]; then
-	#TODO start
 	echo "start"
+	>&2 echo "  running start ..." #TODO SILENT
+	for (( i=0; i<$lenHosts; i++ )) 
+	do
+		start_cmd "${config[@]}"  $i &
+	done
+	wait
+	>&2 echo "  start complete"
 	exit 0 
 	#to prevent from doing excessive control calls below
 fi

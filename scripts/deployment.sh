@@ -95,13 +95,12 @@ dep_prod() {
 # dep or prod
 projectRoot=$(echo $config | jq '."projectRoot"' | sed 's/"//g')
 lenHosts=$(echo $config | jq '."hosts" | length')
+if [ -z "$lenHosts" ]; then
+	lenHosts=0
+fi
 if [ "$dOrP" == "d" ]; then # dev mode
 	>&2 echo "  dev deploying ..." #TODO SILENT
 	#   cp diff to nodes
-	if [ -z "$lenHosts" ]; then
-		lenHosts=0
-	fi
-	ok=0
 	for (( i=0; i<$lenHosts; i++ )) 
 	do
 		dep_dev $projectRoot "${config[@]}"  $i &
@@ -111,9 +110,6 @@ if [ "$dOrP" == "d" ]; then # dev mode
 elif [ "$dOrP" == "p" ]; then # prod mode
 	>&2 echo "  prod deploying ..." #TODO SILENT
 	#   run git pull on node
-	if [ -z "$lenHosts" ]; then
-		lenHosts=0
-	fi
 	sshKeyPath=$(echo $config | jq '."sshKeyPath"')
 	for (( i=0; i<$lenHosts; i++ )) 
 	do

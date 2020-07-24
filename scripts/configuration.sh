@@ -28,6 +28,8 @@ flags=$2
 ### GLOBALVARIABLES ################
 ####################################
 pwd_=$(pwd)
+gdpDir=$pwd_/.gdp
+gdpConfig=$gdpDir/.gdp.config
 ####################################
 ### FUNCTIONS ######################
 ####################################
@@ -44,6 +46,7 @@ configure() {
 	HOST_N_KEYPATHS=()
 	defaultGitRepo=$(git remote get-url --push origin)
 	gitRepo=$defaultGitRepo
+	sshKeyPath=
 	if [ "$yToAll" == "n" ]; then
 		# projectname/alias
 		read -p "projectName [$dirRoot]: " projectName 
@@ -123,7 +126,7 @@ configure() {
 	json={$pnKV,$prKV,$aKV,$hnk,$gKV}
 	#save "pretty" json
 	echo $json | jq > $gdpConfig
-	echo "configuration saved to" $pwd_/$gdpConfig
+	echo "configuration saved to" $gdpConfig
 }
 read_config() {
 	#TODO
@@ -135,9 +138,11 @@ read_config() {
 ### ROUTINE ########################
 ####################################
 # check pwd for config
-gdpConfig=$pwd_/.gdp.config
 mustConfigure=0
-if [ ! -f $gdpConfig ];then
+if ! test -d $gdpDir; then
+	mkdir $gdpDir
+fi
+if ! test -f $gdpConfig; then
 	mustConfigure=$(($mustConfigure||1))
 elif [ ! -z $(echo $flags|grep c ) ];then
 	mustConfigure=$(($mustConfigure||1))
@@ -146,7 +151,7 @@ if [ $mustConfigure -eq 1 ]; then
 	if [ -z "$yToAll" ];then
 		yToAll="n"
 	fi
-	echo "gdp is not configured for this project" #"TODO"
+	echo "configure gdp for this project" #"TODO"
 	if [ $yToAll == "n" ]; then
 		echo "press ENTER for defaults"
 		read -p "configure? [y/n]: " yn

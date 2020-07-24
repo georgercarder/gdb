@@ -40,7 +40,7 @@ if [ ! -z "$d" ]; then
 fi
 config=
 if [ $atLeastOne -eq 1 ]; then
-	gdpConfig=$pwd_/.gdp.config
+	gdpConfig=$pwd_/.gdp/.gdp.config
 	config=$(cat $gdpConfig)
 else
 	exit 0
@@ -53,6 +53,7 @@ dep_dev() {
 
 	host=$(echo $config | jq .hosts[$h])
 	userNHost=$(echo $host | jq '."user@host"' | sed 's/"//g')
+	>&2 echo "    "$userNHost
 	pathToPrivateKey=$(echo $host | jq '.pathToPrivateKey')
 	targetPath=$(echo $host | jq '.targetPath' | sed 's/"//g')
 	rsync -avz -e "ssh -i $pathToPrivateKey" \
@@ -70,6 +71,7 @@ dep_prod() {
 	h=$3
 	host=$(echo $config | jq .hosts[$h])
 	userNHost=$(echo $host | jq '."user@host"' | sed 's/"//g')
+	>&2 echo "    "$userNHost
 	pathToPrivateKey=$(echo $host | jq '.pathToPrivateKey' | sed 's/"//g')
 	targetPath=$(echo $host | jq '.targetPath' | sed 's/"//g')
 	projectFolder=${projectRoot##*/}

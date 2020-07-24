@@ -4,6 +4,8 @@
 # GENERAL PUBLIC LICENSE Version 3, 29 June 2007
 # see LICENSE at project root
 
+>&2 echo "gdp"
+
 flags=$1
 
 gdp_help $flags

@@ -136,11 +136,11 @@ build_rem() {
 	targetPath=$(echo $host | jq '."targetPath"' | sed 's/"//g')	
 	projectFolder=${projectRoot##*/}
 	buildPath=$targetPath/$projectFolder/$buildDir
-	ssh -i $pathToPrivateKey $userNHost "cd $buildPath &&"\
-			" $buildCommand" 2>> $gdpLogs
+	ssh -i $pathToPrivateKey $userNHost "cd $buildPath && $buildCommand" \
+		2>> $gdpLogs
 	ext=$?
 	if [ $ext -ne 0 ]; then
-		>&2 echo "  prod deployment failure for" $userNHost
+		>&2 echo "  build failure for" $userNHost
 	fi
 }
 # build

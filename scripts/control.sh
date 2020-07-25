@@ -14,7 +14,7 @@ flags=$1
 #
 # start s 
 #
-# restart r
+# restart r -> (stop then start)
 #
 # stop t (terminate) 
 #
@@ -54,6 +54,7 @@ parse_json() {
 start_cmd() {
 	config=$1
 	h=$2
+	cmd=$3
 	host=$(echo $config | jq .hosts[$h])
 	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
 	userNHost=$(parse_json "${host[@]}" user@host)
@@ -74,18 +75,17 @@ start_cmd() {
 	ext=$?
 	if [ $ext -ne 0 ]; then
 		if [ -z "$userNHost" ]; then
-			>&2 echo "  start failure. gdp config error" 
+			>&2 echo "  $cmd failure. gdp config error" 
 		else
-			>&2 echo "  start failure for" $userNHost
+			>&2 echo "  $cmd failure for" $userNHost
 		fi
 	fi
 }
 if [ $s -eq 1 ]; then
-	echo "start"
 	>&2 echo "  running start ..." #TODO SILENT
 	for (( i=0; i<$lenHosts; i++ )) 
 	do
-		start_cmd "${config[@]}"  $i &
+		start_cmd "${config[@]}"  $i "start" &
 	done
 	wait
 	>&2 echo "  start complete"
@@ -94,8 +94,14 @@ if [ $s -eq 1 ]; then
 fi
 #restart
 if [ $r -eq 1 ]; then
-	#TODO restart
-	echo "restart"
+	>&2 echo "  running restart ..." #TODO SILENT
+	for (( i=0; i<$lenHosts; i++ )) 
+	do
+		start_cmd "${config[@]}"  $i "restart" &
+	done
+	wait
+	>&2 echo "  restart complete"
+	
 	exit 0
 	#to prevent from doing excessive control calls below
 fi

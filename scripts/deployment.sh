@@ -7,6 +7,7 @@
 pwd_=$(pwd)
 gdpLogs=$pwd_/.gdp/gdp.logs
 gdpConfig=$pwd_/.gdp/gdp.config
+gdpIgnore=$pwd_/.gdp/gdp.ignore
 flags=$1
 parse_json() {
 	json=$1
@@ -57,11 +58,11 @@ dep_dev() {
 	config=$2
 	h=$3
 	host=$(echo $config | jq .hosts[$h])
-	userNHost=$(parse_json "${json[@]}" user@host)
+	userNHost=$(parse_json "${host[@]}" user@host)
 	>&2 echo "    "$userNHost
 	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
 	targetPath=$(parse_json "${host[@]}" targetPath)
-	rsync -avz -e "ssh -i $pathToPrivateKey" \
+	rsync -avz --exclude-from=$gdpIgnore -e "ssh -i $pathToPrivateKey" \
 			$projectRoot $userNHost:$targetPath \
 			>> $gdpLogs 2>&1
 	if [ $? -ne 0 ]; then

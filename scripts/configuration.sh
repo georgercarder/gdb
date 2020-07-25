@@ -30,6 +30,7 @@ flags=$2
 pwd_=$(pwd)
 gdpDir=$pwd_/.gdp
 gdpConfig=$gdpDir/gdp.config
+gdpIgnore=$gdpIgnore/gdp.ignore
 ####################################
 ### FUNCTIONS ######################
 ####################################
@@ -68,6 +69,15 @@ configure() {
 		if [ -z "$alias_" ]; then #default
 			alias_=$projectName
 		fi
+		# files to ignore
+		for (( ; ; ))
+		do
+			read -p "files or dirs to ignore [done]: " ignoreFile
+			if [ -z "$ignoreFile" ]; then
+				break
+			fi
+			echo $ignoreFile >> $gdpIgnore
+		done
 		# numberOfHosts
 		read -p "numberOfHosts [0]: " numberOfHosts
 		if [ -z "$numberOfHosts" ]; then

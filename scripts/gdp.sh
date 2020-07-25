@@ -41,7 +41,6 @@ gdp_configuration $yToAll $flags # c flag?
 ####################################
 gdp_deployment $flags
 
-#TODO
 ####################################
 ### control ########################
 ####################################
@@ -52,7 +51,7 @@ gdp_deployment $flags
 #
 # restart r
 #
-# switch w 
+# switch w  #TODO in future versions
 #   (for advanced CI)
 #
 ####################################

@@ -101,14 +101,38 @@ if [ $r -eq 1 ]; then
 	done
 	wait
 	>&2 echo "  restart complete"
-	
 	exit 0
 	#to prevent from doing excessive control calls below
 fi
 #stop
+stop_cmd() {
+	config=$1
+	h=$2
+	host=$(echo $config | jq .hosts[$h])
+	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
+	userNHost=$(parse_json "${host[@]}" user@host)
+	>&2 echo "    "$userNHost
+	projectRoot=$(parse_json "${config[@]}" projectRoot)
+	projectFolder=${projectRoot##*/}
+	killOld="screen -S gdp-$projectFolder -X quit"
+	ssh -i $pathToPrivateKey $userNHost " $killOld" >> $gdpLogs 2>&1
+	ext=$?
+	if [ $ext -ne 0 ]; then
+		if [ -z "$userNHost" ]; then
+			>&2 echo "  stop failure. gdp config error" 
+		else
+			>&2 echo "  stop failure for" $userNHost
+		fi
+	fi
+}
 if [ $t -eq 1 ]; then
-	#TODO stop	
-	echo "stop"
+	>&2 echo "  running stop ..." #TODO SILENT
+	for (( i=0; i<$lenHosts; i++ )) 
+	do
+		stop_cmd "${config[@]}"  $i &
+	done
+	wait
+	>&2 echo "  stop complete"
 	exit 0
 	#to prevent from doing excessive control calls below
 fi	

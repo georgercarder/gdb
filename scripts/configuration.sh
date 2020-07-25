@@ -81,6 +81,7 @@ configure() {
 			fi
 			echo $ignoreFile >> $gdpIgnore
 		done
+		touch $gdpIgnore
 		# numberOfHosts
 		read -p "numberOfHosts [0]: " numberOfHosts
 		if [ -z "$numberOfHosts" ]; then

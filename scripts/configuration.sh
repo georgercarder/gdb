@@ -30,7 +30,7 @@ flags=$2
 pwd_=$(pwd)
 gdpDir=$pwd_/.gdp
 gdpConfig=$gdpDir/gdp.config
-gdpIgnore=$gdpIgnore/gdp.ignore
+gdpIgnore=$gdpDir/gdp.ignore
 ####################################
 ### FUNCTIONS ######################
 ####################################
@@ -70,6 +70,9 @@ configure() {
 			alias_=$projectName
 		fi
 		# files to ignore
+		echo "---ignore is relative"\
+					"to project root"
+		echo "     " $projectRoot
 		for (( ; ; ))
 		do
 			read -p "files or dirs to ignore [done]: " ignoreFile

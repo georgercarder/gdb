@@ -67,11 +67,13 @@ start_cmd() {
 	startCmd=$(parse_json "${config[@]}" startCmd)
 	killOld="screen -S gdp-$projectFolder -X quit"
 	startNew="screen -dm gdp-$projectFolder"
-       	screenExec="screen -S gdp-$projectFolder -X stuff $'$startCmd\n'"
+	screenExec="screen -S gdp-$projectFolder -X stuff $'$startCmd\n'"
 	ssh -i $pathToPrivateKey $userNHost "cd $executablePath &&"\
 		" $killOld" >> $gdpLogs 2>&1
 	ssh -i $pathToPrivateKey $userNHost "cd $executablePath &&"\
-		" $startNew && $screenExec" >> $gdpLogs 2>&1
+		" $startNew" >> $gdpLogs 2>&1
+	ssh -i $pathToPrivateKey $userNHost "cd $executablePath &&"\
+		" $screenExec" #>> $gdpLogs 2>&1
 	ext=$?
 	if [ $ext -ne 0 ]; then
 		if [ -z "$userNHost" ]; then

@@ -7,15 +7,20 @@
 echo ""
 echo "installing gdp ..."
 
+err_not_installed() {
+	app=$1
+	echo ""
+	echo "installation unsuccessful"
+	echo "  $app is not available"
+	echo "  check your $app installation"
+}
+
 # check for git installed
 echo "  checking git is available ..."
 git version > /dev/null
 ext=$?  #(0 if installed, else nonzero)
 if [ ! $ext -eq 0 ]; then
-	echo ""
-	echo "installation unsuccessful"
-	echo "  git is not available"
-	echo "  check your git installation"
+	err_not_installed "git"
 	exit 1
 fi
 
@@ -24,10 +29,7 @@ echo "  checking openssl is available ..."
 ssh -V 2> /dev/null
 ext=$?  #(0 if installed, else nonzero)
 if [ ! $ext -eq 0 ]; then
-	echo ""
-	echo "installation unsuccessful"
-	echo "  openssl is not available"
-	echo "  check your openssl installation"
+	err_not_installed "openssl"
 	exit 1
 fi
 
@@ -36,22 +38,41 @@ echo "  checking rsync is available ..."
 rsync -V > /dev/null
 ext=$?  #(0 if installed, else nonzero)
 if [ ! $ext -eq 0 ]; then
-	echo ""
-	echo "installation unsuccessful"
-	echo "  openssl is not available"
-	echo "  check your openssl installation"
+	err_not_installed "rsync"
 	exit 1
 fi
 
-ln scripts/gdp.sh /usr/bin/gdp
+# check for jq installed
+echo "  checking jq is available ..."
+jq --help > /dev/null
+ext=$?  #(0 if installed, else nonzeo) 
+if [ ! $ext -eq 0 ]; then
+	err_not_installed "jq"
+	exit 1
+fi
+
+link() {
+	script=$1
+	name=$(echo $script | sed 's/\..*//g')
+	if [ "$name" != "gdp" ]; then 
+		name="gdp_"$name
+	fi
+	binPath=/usr/bin/$name
+	if [ ! -z "$binPath" ]; then
+		rm $binPath
+	fi
+	ln scripts/$script $binPath
+}
+
+link gdp.sh
 ext=$?
-ln scripts/configuration.sh /usr/bin/gdp_configuration
+link configuration.sh
 ext=$(($ext||$?))
-ln scripts/control.sh /usr/bin/gdp_control
+link control.sh
 ext=$(($ext||$?))
-ln scripts/deployment.sh /usr/bin/gdp_deployment
+link deployment.sh
 ext=$(($ext||$?))
-ln scripts/help.sh /usr/bin/gdp_help
+link help.sh
 ext=$(($ext||$?))
 if [ ! $ext -eq 0 ]; then
 	echo ""

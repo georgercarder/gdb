@@ -14,19 +14,19 @@ something simple and fast to bootstrap a project. I wrote `gdp` to meet
 this need. Configuration is fast, the interface is simple, and the great
 performance has it's basis in throroughly-vetted and trusted primitives.  
 
-Here what typical use of `gdp` looks like:
+Here is what typical use of `gdp` looks like:
 
 ```
 # gdp pbs 
 ```
 
-The above snippit triggers each member from your fleet of machines to:
+The above example snippit triggers each member from your fleet of machines to:
 
--- pull from your project's git
+  -- pull from your project's git
 
--- build the project's executable
+  -- build the project's executable
 
--- start the executable
+  -- start the executable
 
 So Simple! Enjoy!
 

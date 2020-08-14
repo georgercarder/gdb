@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Copyright (c) 2020 George Carder georgercarder@gmail.com
 # GENERAL PUBLIC LICENSE Version 3, 29 June 2007

@@ -58,10 +58,10 @@ dep_dev() {
 	config=$2
 	h=$3
 	host=$(echo $config | jq .hosts[$h])
-	userNHost=$(parse_json "${host[@]}" user@host)
+	userNHost=$(parse_json "$host" user@host)
 	>&2 echo "    "$userNHost
-	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
-	targetPath=$(parse_json "${host[@]}" targetPath)
+	pathToPrivateKey=$(parse_json "$host" pathToPrivateKey)
+	targetPath=$(parse_json "$host" targetPath)
 	rsync -avz --exclude-from=$gdpIgnore -e "ssh -i $pathToPrivateKey" \
 			$projectRoot $userNHost:$targetPath \
 			>> $gdpLogs 2>&1
@@ -79,13 +79,13 @@ dep_prod() {
 	config=$2
 	h=$3
 	host=$(echo $config | jq .hosts[$h])
-	userNHost=$(parse_json "${host[@]}" user@host)
+	userNHost=$(parse_json "$host" user@host)
 	>&2 echo "    "$userNHost
-	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
-	targetPath=$(parse_json "${host[@]}" targetPath)
+	pathToPrivateKey=$(parse_json "$host" pathToPrivateKey)
+	targetPath=$(parse_json "$host" targetPath)
 	projectFolder=${projectRoot##*/}
 	gitPullPath=$targetPath/$projectFolder
-	gitRepo=$(parse_json "${host[@]}" gitRepo)
+	gitRepo=$(parse_json "$host" gitRepo)
 	ssh -i $pathToPrivateKey $userNHost "cd $gitPullPath &&"\
 		" git checkout -- . && git pull origin master" 2>> $gdpLogs
 	ext=$?
@@ -99,27 +99,31 @@ dep_prod() {
 }
 
 # dep or prod
-projectRoot=$(parse_json "${config[@]}" projectRoot)
+projectRoot=$(parse_json "$config" projectRoot)
 lenHosts=$(echo $config | jq '."hosts" | length')
 if [ -z "$lenHosts" ]; then
 	lenHosts=0
 fi
-if [ "$dOrP" == "d" ]; then # dev mode
+if [ "$dOrP" = "d" ]; then # dev mode
 	>&2 echo "  dev deploying ..." #TODO SILENT
 	#   cp diff to nodes
-	for (( i=0; i<$lenHosts; i++ )) 
+	i=0
+	while [ "$i" -ne $lenHosts ];
 	do
-		dep_dev $projectRoot "${config[@]}"  $i &
+		dep_dev $projectRoot "$config"  $i &
+		i=$(($i+1))
 	done
 	wait
 	>&2 echo "  dev deployment complete"
-elif [ "$dOrP" == "p" ]; then # prod mode
+elif [ "$dOrP" = "p" ]; then # prod mode
 	>&2 echo "  prod deploying ..." #TODO SILENT
 	#   run git pull on node
-	sshKeyPath=$(parse_json "${config[@]}" sshKeyPath)
-	for (( i=0; i<$lenHosts; i++ )) 
+	sshKeyPath=$(parse_json "$config" sshKeyPath)
+	i=0
+	while [ "$i" -new $lenHosts ];
 	do
-		dep_prod $projectRoot "${config[@]}" $i $sshKeyPath &
+		dep_prod $projectRoot "$config" $i $sshKeyPath &
+		i=$(($i+1))
 	done
 	wait
 	>&2 echo "  prod deployment complete"
@@ -136,10 +140,10 @@ build_rem() {
 	config=$4
 	h=$5
 	host=$(echo $config | jq .hosts[$h])
-	userNHost=$(parse_json "${host[@]}" user@host)
+	userNHost=$(parse_json "$host" user@host)
 	>&2 echo "    "$userNHost
-	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
-	targetPath=$(parse_json "${host[@]}" targetPath)	
+	pathToPrivateKey=$(parse_json "$host" pathToPrivateKey)
+	targetPath=$(parse_json "$host" targetPath)	
 	projectFolder=${projectRoot##*/}
 	buildPath=$targetPath/$projectFolder/$buildDir
 	ssh -i $pathToPrivateKey $userNHost "cd $buildPath && $buildCommand" \
@@ -154,8 +158,8 @@ build_rem() {
 if [ -z $lenHosts ]; then
 	lenHosts=0
 fi
-buildDir=$(parse_json "${config[@]}" buildDir)
-buildCommand=$(parse_json "${config[@]}" buildCommand)
+buildDir=$(parse_json "$config" buildDir)
+buildCommand=$(parse_json "$config" buildCommand)
 if [ -z "$buildDir" ]; then
 	echo "buildDir config entry empty. Check" $gdpConfig
 	exit 1
@@ -163,9 +167,11 @@ elif [ -z "$buildCommand" ]; then
 	echo "buildCommand config entry empty. Check" $gdpConfig
 	exit 1
 fi
-for (( i=0; i<$lenHosts; i++ )) 
+i=0
+while [ "$i" -ne $lenHosts ];
 do
-	build_rem $projectRoot $buildDir "${buildCommand[@]}" "${config[@]}" $i &
+	build_rem $projectRoot $buildDir "$buildCommand" "$config" $i &
+	i=$(($i+1))
 done
 wait
 echo "  build complete"

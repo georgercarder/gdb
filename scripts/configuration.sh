@@ -44,7 +44,7 @@ configure() {
 	alias_=$projectName
 	numberOfHosts=0
 	defaultTargetPath="~/"
-	HOST_N_KEYPATHS=()
+	HOST_N_KEYPATHS=
 	defaultGitRepo=$(git remote get-url --push origin)
 	gitRepo=$defaultGitRepo
 	defaultBuildDir="."
@@ -53,7 +53,7 @@ configure() {
 	buildCommand=
 	executableDir=
 	startCmd=
-	if [ "$yToAll" == "n" ]; then
+	if [ "$yToAll" = "n" ]; then
 		# projectname/alias
 		read -p "projectName [$dirRoot]: " projectName 
 		if [ -z "$projectName" ]; then #default
@@ -73,7 +73,7 @@ configure() {
 		echo "---ignore is relative"\
 					"to project root"
 		echo "     " $projectRoot
-		for (( ; ; ))
+		while [ true ];
 		do
 			read -p "files or dirs to ignore [done]: " ignoreFile
 			if [ -z "$ignoreFile" ]; then
@@ -90,7 +90,8 @@ configure() {
 				"later. "\
 				"(See -help later)"
 		fi
-		for (( h=0; h<$numberOfHosts; h++ )) 
+		h=0
+		while [ "$h" -ne $numberOfHosts ];
 		do
 			# hosts <--> privKeys
 			read -p "  <user@host>$h: " host
@@ -121,10 +122,11 @@ configure() {
 			if [ -z "$targetPath" ]; then
 				targetPath=$defaultTargetPath
 			fi
-			host_n_keypath=(\"user@host\":\"$host\",\
+			host_n_keypath="\"user@host\":\"$host\",\
 					\"pathToPrivateKey\":\"$pkPath\",\
-					\"targetPath\":\"$targetPath\")
-			HOST_N_KEYPATHS+=({${host_n_keypath[@]}},)
+					\"targetPath\":\"$targetPath\""
+			HOST_N_KEYPATHS=$HOST_N_KEYPATHS" {$host_n_keypath},"
+			h=$(($h+1))
 		done
 		# git repository 
 		read -p "git repository [$defaultGitRepo]: " gitRepo
@@ -156,14 +158,14 @@ configure() {
 	pnKV=\"projectName\":\"$projectName\"
 	prKV=\"projectRoot\":\"$projectRoot\"
 	aKV=\"alias_\":\"$alias_\"
-	hnk=${HOST_N_KEYPATHS[@]} #arr to string
+	hnk=$HOST_N_KEYPATHS #arr to string
 	if [ ! -z "$hnk" ]; then
-		hnk=${hnk::-1} #removes last comma
+		hnk=$(echo $hnk| sed 's/,$//g') #removes last comma
 	else
-		host_n_keypath=(\"user@host\":\"\",\
+		host_n_keypath="\"user@host\":\"\",\
 				\"pathToPrivateKey\":\"\",\
-				\"targetPath\":\"\")
-		hnk={${host_n_keypath[@]}}
+				\"targetPath\":\"\""
+		hnk={$host_n_keypath}
 	fi
 	hnk=\"hosts\":[$hnk]
 	gKV=\"gitRepo\":\"$gitRepo\"
@@ -194,14 +196,14 @@ if [ $mustConfigure -eq 1 ]; then
 		yToAll="n"
 	fi
 	echo "configure gdp for this project" #"TODO"
-	if [ $yToAll == "n" ]; then
+	if [ $yToAll = "n" ]; then
 		echo "press ENTER for defaults"
 		read -p "configure? [y]: " yn
 		if [ -z "$yn" ]; then 
 			yn="y" 
 		fi
 	fi
-	if [ "$yn" == "n" ]; then 
+	if [ "$yn" = "n" ]; then 
 		echo "configuration is necessary to use gdp"
 		exit 1 
 	else

@@ -56,15 +56,15 @@ start_cmd() {
 	h=$2
 	cmd=$3
 	host=$(echo $config | jq .hosts[$h])
-	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
-	userNHost=$(parse_json "${host[@]}" user@host)
+	pathToPrivateKey=$(parse_json "$host" pathToPrivateKey)
+	userNHost=$(parse_json "$host" user@host)
 	>&2 echo "    "$userNHost
-	executableDir=$(parse_json "${config[@]}" executableDir)
-	projectRoot=$(parse_json "${config[@]}" projectRoot)
-	targetPath=$(parse_json "${host[@]}" targetPath)
+	executableDir=$(parse_json "$config" executableDir)
+	projectRoot=$(parse_json "$config" projectRoot)
+	targetPath=$(parse_json "$host" targetPath)
 	projectFolder=${projectRoot##*/}
 	executablePath=$targetPath/$projectFolder/$executableDir
-	startCmd=$(parse_json "${config[@]}" startCmd)
+	startCmd=$(parse_json "$config" startCmd)
 	killOld="screen -S gdp-$projectFolder -X quit"
 	startNew="screen -dm gdp-$projectFolder"
 	screenExec="screen -S gdp-$projectFolder -X stuff $'$startCmd\n'"
@@ -85,9 +85,11 @@ start_cmd() {
 }
 if [ $s -eq 1 ]; then
 	>&2 echo "  running start ..." #TODO SILENT
-	for (( i=0; i<$lenHosts; i++ )) 
+	i=0
+	while [ "$i" -ne $lenHosts ];
 	do
-		start_cmd "${config[@]}"  $i "start" &
+		start_cmd "$config"  $i "start" &
+		i=$(($i+1))
 	done
 	wait
 	>&2 echo "  start complete"
@@ -97,9 +99,11 @@ fi
 #restart
 if [ $r -eq 1 ]; then
 	>&2 echo "  running restart ..." #TODO SILENT
-	for (( i=0; i<$lenHosts; i++ )) 
+	i=0
+	while [ "$i" -ne $lenHosts ];
 	do
-		start_cmd "${config[@]}"  $i "restart" &
+		start_cmd "$config"  $i "restart" &
+		i=$(($i+1))
 	done
 	wait
 	>&2 echo "  restart complete"
@@ -111,10 +115,10 @@ stop_cmd() {
 	config=$1
 	h=$2
 	host=$(echo $config | jq .hosts[$h])
-	pathToPrivateKey=$(parse_json "${host[@]}" pathToPrivateKey)
-	userNHost=$(parse_json "${host[@]}" user@host)
+	pathToPrivateKey=$(parse_json "$host" pathToPrivateKey)
+	userNHost=$(parse_json "$host" user@host)
 	>&2 echo "    "$userNHost
-	projectRoot=$(parse_json "${config[@]}" projectRoot)
+	projectRoot=$(parse_json "$config" projectRoot)
 	projectFolder=${projectRoot##*/}
 	killOld="screen -S gdp-$projectFolder -X quit"
 	ssh -i $pathToPrivateKey $userNHost " $killOld" >> $gdpLogs 2>&1
@@ -129,9 +133,11 @@ stop_cmd() {
 }
 if [ $t -eq 1 ]; then
 	>&2 echo "  running stop ..." #TODO SILENT
-	for (( i=0; i<$lenHosts; i++ )) 
+	i=0
+	while [ "$i" -ne $lenHosts ];
 	do
-		stop_cmd "${config[@]}"  $i &
+		stop_cmd "$config"  $i &
+		i=$(($i+1))
 	done
 	wait
 	>&2 echo "  stop complete"

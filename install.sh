@@ -80,7 +80,6 @@ if [ ! $ext -eq 0 ]; then
 	echo "  try:"
 	echo "  - using sudo"
 	echo "  - removing symlinks /usr/bin/gdp and try again"
-	echo "  - checking system has bash"
 	echo ""
 	exit 1
 fi

@@ -34,7 +34,7 @@ note: So far this has been tested in only a few environments, but if you
 are having issues with your setup, let me know in the "git-issues" and
 I'll push an update.
 
-##### intallation
+##### installation
 
 - run `sudo ./install.sh`
 
